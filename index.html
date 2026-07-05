@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한글 음절 구조 게임</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+
+  :root {
+    --bg: #f0f4f8;
+    --card-bg: #ffffff;
+    --accent: #ff7eb3;
+    --accent2: #7eb8ff;
+    --accent3: #a8e6cf;
+    --text: #2d3748;
+    --text-light: #718096;
+    --border: #cbd5e0;
+    --slot-empty: #e8f0fe;
+    --slot-border: #b0c4de;
+    --slot-hover: #d0e8ff;
+    --slot-filled: #fff0f5;
+    --slot-filled-border: #ff7eb3;
+    --correct: #68d391;
+    --wrong: #fc8181;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,126,179,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(126,184,255,0.08) 0%, transparent 50%);
+  }
+
+  .game-container {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 span {
+    color: var(--accent);
+  }
+
+  /* Progress bar */
+  .progress-section {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .progress-count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .progress-bar-wrap {
+    background: #e8ecf0;
+    border-radius: 100px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease;
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .question-hint {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 20px;
+    line-height: 1.8;
+  }
+
+  .question-hint strong {
+    color: var(--text);
+  }
+
+  .hint-word {
+    display: block;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: 6px;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+
+  .hint-sub {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-light);
+  }
+
+  /* Syllables row */
+  .syllables-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* L-shape syllable block */
+  .syllable-block {
+    display: grid;
+    grid-template-columns: 80px 80px;
+    grid-template-rows: 80px 80px;
+    gap: 6px;
+    position: relative;
+  }
+
+  .slot {
+    border: 2.5px dashed var(--slot-border);
+    border-radius: 14px;
+    background: var(--slot-empty);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text);
+    cursor: default;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+  }
+
+  .slot.slot-top {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .slot.slot-left {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .slot.slot-center {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .slot.hidden {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .slot.wrong {
+    background: #fff5f5;
+    border: 2.5px solid var(--wrong);
+    border-style: solid;
+    animation: shake 0.4s ease;
+  }
+
+  .slot.revealed {
+    background: #fffbea;
+    border: 2.5px solid #f6c90e;
+    border-style: solid;
+    color: #b7860b;
+  }
+
+  .slot .x-mark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--wrong);
+    font-weight: 900;
+    pointer-events: none;
+  }
+
+  @keyframes xIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .x-mark { animation: xIn 0.15s ease; }
+
+  .slot.droppable {
+    cursor: crosshair;
+    border-style: dashed;
+  }
+
+  .slot.droppable:hover, .slot.drag-over {
+    background: var(--slot-hover);
+    border-color: var(--accent2);
+    transform: scale(1.04);
+    box-shadow: 0 0 0 3px rgba(126,184,255,0.25);
+  }
+
+  .slot.filled {
+    background: var(--slot-filled);
+    border: 2.5px solid var(--slot-filled-border);
+    border-style: solid;
+  }
+
+  .slot.correct {
+    background: #f0fff4;
+    border-color: var(--correct);
+    border-style: solid;
+    animation: popIn 0.3s ease;
+  }
+
+  .slot.wrong-anim {
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.85); }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .slot .slot-label {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 0.6rem;
+    color: var(--text-light);
+    font-weight: 700;
+    opacity: 0.6;
+  }
+
+  /* Corner filler (invisible spacer) */
+  .slot-spacer {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /* Drag items */
+  .drag-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .drag-section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .drag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .drag-item {
+    width: 62px;
+    height: 62px;
+    border-radius: 14px;
+    background: white;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: var(--text);
+    cursor: grab;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow-sm);
+    user-select: none;
+    position: relative;
+  }
+
+  .drag-item:hover {
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    border-color: var(--accent);
+    z-index: 10;
+  }
+
+  .drag-item.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+  }
+
+  .drag-item.used {
+    opacity: 0.25;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .drag-item.consonant-item {
+    background: linear-gradient(135deg, #fff5f8, #fff);
+    border-color: #ffd6e7;
+  }
+
+  .drag-item.vowel-item {
+    background: linear-gradient(135deg, #f0f8ff, #fff);
+    border-color: #c5ddf5;
+  }
+
+  .drag-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 12px;
+  }
+
+  .drag-section-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1.5px dashed var(--border);
+  }
+
+  .drag-section-divider span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  /* Buttons */
+  .btn-next {
+    display: none;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), #ff5a9d);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(255,126,179,0.4);
+    letter-spacing: 0.3px;
+  }
+
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255,126,179,0.5);
+  }
+
+  .btn-next.visible {
+    display: block;
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Completion screen */
+  .completion-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .completion-screen.visible {
+    display: block;
+    animation: fadeUp 0.5s ease;
+  }
+
+  .completion-emoji {
+    font-size: 4rem;
+    margin-bottom: 16px;
+  }
+
+  .completion-screen h2 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .completion-screen p {
+    color: var(--text-light);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .btn-restart {
+    padding: 14px 40px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent2), #5a9fff);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(126,184,255,0.4);
+  }
+
+  .btn-restart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(126,184,255,0.5);
+  }
+
+  /* Floating drag ghost */
+  .drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    width: 62px;
+    height: 62px;
+    border-radius: 14px;
+    background: white;
+    border: 2.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    font-weight: 900;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    transform: translate(-50%, -50%) scale(1.1);
+    transition: transform 0.05s;
+    display: none;
+  }
+
+  .type-badge {
+    font-size: 0.6rem;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    color: var(--text-light);
+    opacity: 0.7;
+    font-weight: 700;
+  }
+
+  /* Score stats */
+  .score-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0 24px;
+  }
+
+  .score-box {
+    flex: 1;
+    max-width: 130px;
+    border-radius: 16px;
+    padding: 16px 10px;
+    text-align: center;
+  }
+
+  .score-box.correct-box {
+    background: #f0fff4;
+    border: 2px solid #68d391;
+  }
+
+  .score-box.wrong-box {
+    background: #fff5f5;
+    border: 2px solid #fc8181;
+  }
+
+  .score-box .score-num {
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .score-box.correct-box .score-num { color: #38a169; }
+  .score-box.wrong-box .score-num { color: #e53e3e; }
+
+  .score-box .score-lbl {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+
+  /* Music player */
+  .music-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 50px;
+    padding: 10px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    border: 1.5px solid #f0d6e8;
+    transition: all 0.2s ease;
+  }
+
+  .music-player:hover {
+    box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+  }
+
+  .music-btn {
+    background: linear-gradient(135deg, var(--accent), #ff5a9d);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    box-shadow: 0 2px 8px rgba(255,126,179,0.4);
+  }
+
+  .music-btn:hover { transform: scale(1.1); }
+
+  .music-note {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    font-weight: 700;
+    white-space: nowrap;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .volume-icon { font-size: 0.85rem; color: var(--text-light); }
+
+  .volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 70px;
+    height: 4px;
+    border-radius: 10px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(255,126,179,0.5);
+  }
+
+  @keyframes musicPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  .music-btn.playing { animation: musicPulse 1.2s ease infinite; }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+  <div class="header">
+    <h1>한글 <span>음절 구조</span> 연습</h1>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-info">
+      <span class="progress-label">진행도</span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div id="mainContent">
+    <div class="question-card" id="questionCard">
+      <div class="question-hint" id="questionHint"></div>
+      <div class="syllables-row" id="syllablesRow"></div>
+    </div>
+
+    <div class="drag-section" id="dragSection">
+      <div id="dragConsonantLabel" class="drag-section-label">자음 (Phụ âm)</div>
+      <div class="drag-row" id="dragConsonants"></div>
+      <div id="vowelDivider" class="drag-section-divider" style="display:none">
+        <hr><span>nguyên âm (모음)</span><hr>
+      </div>
+      <div class="drag-row" id="dragVowels" style="display:none"></div>
+    </div>
+
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">다음 문제 →</button>
+  </div>
+
+  <div class="completion-screen" id="completionScreen">
+    <div class="completion-emoji">🎉</div>
+    <h2>완료했어요!</h2>
+    <div class="score-stats">
+      <div class="score-box correct-box">
+        <div class="score-num" id="scoreCorrect">0</div>
+        <div class="score-lbl">✅ Đúng</div>
+      </div>
+      <div class="score-box wrong-box">
+        <div class="score-num" id="scoreWrong">0</div>
+        <div class="score-lbl">❌ Sai</div>
+      </div>
+    </div>
+    <p id="scoreMsg">모든 단계를 완료했습니다!<br>한글 음절 구조를 잘 이해하고 있어요!</p>
+    <button class="btn-restart" onclick="restartGame()">다시 하기 🔄</button>
+  </div>
+</div>
+
+<!-- Music Player -->
+<div class="music-player" id="musicPlayer">
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="Bật/tắt nhạc">▶</button>
+  <span class="music-note" id="musicNote">♪ nhạc dễ thương</span>
+  <div class="volume-wrap">
+    <span class="volume-icon">🔈</span>
+    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="40" oninput="setVolume(this.value)">
+  </div>
+</div>
+
+<div class="drag-ghost" id="dragGhost"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const VOWELS_VERTICAL = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅣ'];
+const VOWELS_HORIZONTAL = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+const ALL_CONSONANTS = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ','ㄲ','ㄸ','ㅃ','ㅆ','ㅉ'];
+const ALL_VOWELS = [...VOWELS_VERTICAL, ...VOWELS_HORIZONTAL];
+
+// Vocabulary list broken into syllables
+const VOCAB_RAW = ['오','고','모','보','우','구','무','부','으','꾸','므','르','요','쿄','묘','료','쿠','루','아','가','나','다','어','거','러','머','이','기','미','비','야','갸','먀','뱌','여','겨','며','벼','코','파','바보','피자','파도','치즈','부자','기차표','머리','다리','모자','하트','우유','미소','피아노','아버지','어머니','소나무','라디오','도토리','마이크','주머니','주사기','거미'];
+
+// Decompose a Korean character into (consonant, vowel) or return null
+function decomposeChar(ch) {
+  const code = ch.charCodeAt(0);
+  if (code < 0xAC00 || code > 0xD7A3) return null;
+  const offset = code - 0xAC00;
+  const jong = offset % 28;
+  const jung = ((offset - jong) / 28) % 21;
+  const cho = Math.floor(offset / 28 / 21);
+  const choArr = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const jungArr = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  const vowel = jungArr[jung];
+  const consonant = choArr[cho];
+  return { consonant, vowel, hasJong: jong !== 0 };
+}
+
+// Split word into syllable objects
+function parseSyllables(word) {
+  const result = [];
+  for (const ch of word) {
+    const d = decomposeChar(ch);
+    if (!d) continue;
+    const isVert = VOWELS_VERTICAL.includes(d.vowel);
+    result.push({
+      char: ch,
+      consonant: d.consonant,
+      vowel: d.vowel,
+      isVertical: isVert
+    });
+  }
+  return result;
+}
+
+// Filter vocab by syllable count
+function getVocabBySyllables(count) {
+  return VOCAB_RAW.filter(w => {
+    const syls = parseSyllables(w);
+    return syls.length === count && syls.every(s => !decomposeChar(s.char)?.hasJong);
+  });
+}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let levels = [];
+let currentLevel = 0;
+let currentQuestion = 0;
+let totalQuestions = 0;
+let questionsAnswered = 0;
+let scoreCorrect = 0;
+let scoreWrong = 0;
+let currentSyllables = [];
+let currentSlots = []; // [{slotEl, type, expectedValue, filled}]
+let dragSource = null; // {char, type, itemEl, origin}
+let questionHadWrong = false; // track if current question had any wrong answer
+
+// Build all levels
+function buildLevels() {
+  levels = [];
+  const vocab1 = getVocabBySyllables(1);
+  const vocab2 = getVocabBySyllables(2);
+  const vocab3 = getVocabBySyllables(3);
+
+  // Level 1: 6 questions, 1 syllable, easy (vowel shown, 1 empty slot)
+  levels.push({ mode: 'easy', syllableCount: 1, questionCount: 6, vocab: vocab1 });
+  // Level 2: 4 questions, 2 syllables
+  levels.push({ mode: 'easy', syllableCount: 2, questionCount: 4, vocab: vocab2 });
+  // Level 3: 3 questions, 3 syllables
+  levels.push({ mode: 'easy', syllableCount: 3, questionCount: 3, vocab: vocab3 });
+  // Level 4: hard, 1 syllable
+  levels.push({ mode: 'hard', syllableCount: 1, questionCount: 4, vocab: vocab1 });
+  // Level 5: hard, 2 syllables
+  levels.push({ mode: 'hard', syllableCount: 2, questionCount: 3, vocab: vocab2 });
+  // Level 6: hard, 3 syllables
+  levels.push({ mode: 'hard', syllableCount: 3, questionCount: 2, vocab: vocab3.length > 0 ? vocab3 : vocab2 });
+
+  totalQuestions = levels.reduce((s, l) => s + l.questionCount, 0);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandom(arr, n) {
+  return shuffle(arr).slice(0, n);
+}
+
+// ============================================================
+// RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+  const level = levels[currentLevel];
+  const vocab = shuffle(level.vocab);
+  const word = vocab[currentQuestion % vocab.length] || vocab[0];
+  currentSyllables = parseSyllables(word);
+  currentSlots = [];
+
+  questionHadWrong = false;
+  const hint = document.getElementById('questionHint');
+  const syllablesRow = document.getElementById('syllablesRow');
+  const btnNext = document.getElementById('btnNext');
+  btnNext.classList.remove('visible');
+
+  // Hint text
+  if (level.mode === 'easy') {
+    hint.innerHTML = `<span class="hint-word">${word}</span><span class="hint-sub">빈 칸에 올바른 <strong>자음</strong>을 넣으세요</span>`;
+  } else {
+    hint.innerHTML = `<span class="hint-word">${word}</span><span class="hint-sub">빈 칸에 <strong>자음</strong>과 <strong>모음</strong>을 모두 넣으세요</span>`;
+  }
+
+  syllablesRow.innerHTML = '';
+
+  currentSyllables.forEach((syl, idx) => {
+    const block = document.createElement('div');
+    block.className = 'syllable-block';
+
+    // slot-top (consonant for horizontal vowels)
+    const slotTop = document.createElement('div');
+    slotTop.className = 'slot slot-top';
+
+    // slot-left (consonant for vertical vowels)  
+    const slotLeft = document.createElement('div');
+    slotLeft.className = 'slot slot-left';
+
+    // slot-center (vowel)
+    const slotCenter = document.createElement('div');
+    slotCenter.className = 'slot slot-center';
+
+    if (level.mode === 'easy') {
+      // Show vowel always in center
+      slotCenter.textContent = syl.vowel;
+      slotCenter.classList.add('filled', 'correct');
+
+      if (syl.isVertical) {
+        // Correct consonant slot = LEFT; TOP is wrong-position slot (still droppable but will show wrong)
+        slotTop.classList.add('droppable');
+        slotTop.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotTop, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: false });
+        slotLeft.classList.add('droppable');
+        slotLeft.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotLeft, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: true });
+      } else {
+        // Correct consonant slot = TOP; LEFT is wrong-position slot
+        slotTop.classList.add('droppable');
+        slotTop.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotTop, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: true });
+        slotLeft.classList.add('droppable');
+        slotLeft.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotLeft, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: false });
+      }
+    } else {
+      // Hard mode: all 3 slots droppable
+      if (syl.isVertical) {
+        // TOP = wrong position for consonant (still interactive)
+        slotTop.classList.add('droppable');
+        slotTop.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotTop, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: false });
+        // LEFT = correct position for consonant
+        slotLeft.classList.add('droppable');
+        slotLeft.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotLeft, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: true });
+      } else {
+        // TOP = correct position for consonant
+        slotTop.classList.add('droppable');
+        slotTop.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotTop, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: true });
+        // LEFT = wrong position for consonant
+        slotLeft.classList.add('droppable');
+        slotLeft.dataset.slotIdx = currentSlots.length;
+        currentSlots.push({ slotEl: slotLeft, type: 'consonant', expectedValue: syl.consonant, filled: false, syllableIdx: idx, isCorrectPosition: false });
+      }
+      // CENTER = vowel slot
+      slotCenter.classList.add('droppable');
+      slotCenter.dataset.slotIdx = currentSlots.length;
+      currentSlots.push({ slotEl: slotCenter, type: 'vowel', expectedValue: syl.vowel, filled: false, syllableIdx: idx, isCorrectPosition: true });
+    }
+
+    const spacer = document.createElement('div');
+    spacer.className = 'slot-spacer';
+
+    block.appendChild(spacer);
+    block.appendChild(slotTop);
+    block.appendChild(slotLeft);
+    block.appendChild(slotCenter);
+    syllablesRow.appendChild(block);
+  });
+
+  // Setup droppable events
+  currentSlots.forEach(s => {
+    setupDropTarget(s.slotEl);
+  });
+
+  // Build drag items
+  buildDragItems(level);
+  updateProgress();
+}
+
+function buildDragItems(level) {
+  const consonantsContainer = document.getElementById('dragConsonants');
+  const vowelsContainer = document.getElementById('dragVowels');
+  const vowelDivider = document.getElementById('vowelDivider');
+  const conLabel = document.getElementById('dragConsonantLabel');
+  consonantsContainer.innerHTML = '';
+  vowelsContainer.innerHTML = '';
+
+  const neededConsonants = currentSyllables.map(s => s.consonant);
+  const neededVowels = currentSyllables.map(s => s.vowel);
+
+  // Pick distractors
+  const distConsonants = ALL_CONSONANTS.filter(c => !neededConsonants.includes(c));
+  const distVowels = ALL_VOWELS.filter(v => !neededVowels.includes(v));
+
+  const totalConsonants = neededConsonants.length;
+  const totalVowels = neededVowels.length;
+
+  const extraCons = pickRandom(distConsonants, Math.max(5 - totalConsonants, 2));
+  const extraVows = pickRandom(distVowels, Math.max(5 - totalVowels, 2));
+
+  const consToShow = shuffle([...neededConsonants, ...extraCons]);
+  const vowsToShow = shuffle([...neededVowels, ...extraVows]);
+
+  if (level.mode === 'hard') {
+    conLabel.textContent = '자음 (Phụ âm)';
+    vowelDivider.style.display = 'flex';
+    vowelsContainer.style.display = 'flex';
+
+    vowsToShow.forEach(v => {
+      const item = createDragItem(v, 'vowel');
+      vowelsContainer.appendChild(item);
+    });
+  } else {
+    conLabel.textContent = '자음 (Phụ âm) — 올바른 것을 끌어다 넣으세요';
+    vowelDivider.style.display = 'none';
+    vowelsContainer.style.display = 'none';
+  }
+
+  consToShow.forEach(c => {
+    const item = createDragItem(c, 'consonant');
+    consonantsContainer.appendChild(item);
+  });
+}
+
+function createDragItem(char, type) {
+  const item = document.createElement('div');
+  item.className = `drag-item ${type}-item`;
+  item.textContent = char;
+  item.dataset.char = char;
+  item.dataset.type = type;
+
+  const badge = document.createElement('span');
+  badge.className = 'type-badge';
+  badge.textContent = type === 'consonant' ? '자' : '모';
+  item.appendChild(badge);
+
+  setupDragSource(item);
+  return item;
+}
+
+// ============================================================
+// DRAG & DROP (mouse + touch)
+// ============================================================
+let ghost = null;
+let activeSlotHighlight = null;
+
+function setupDragSource(el) {
+  // Mouse
+  el.addEventListener('mousedown', onDragStart);
+  // Touch
+  el.addEventListener('touchstart', onTouchStart, { passive: false });
+}
+
+function setupDropTarget(el) {
+  el.addEventListener('mouseenter', () => {
+    if (dragSource) {
+      el.classList.add('drag-over');
+    }
+  });
+  el.addEventListener('mouseleave', () => {
+    el.classList.remove('drag-over');
+  });
+}
+
+let isDragging = false;
+let currentGhostChar = '';
+
+function onDragStart(e) {
+  if (e.target.classList.contains('used')) return;
+  e.preventDefault();
+  dragSource = {
+    char: e.currentTarget.dataset.char,
+    type: e.currentTarget.dataset.type,
+    itemEl: e.currentTarget
+  };
+  isDragging = true;
+  currentGhostChar = dragSource.char;
+  showGhost(e.clientX, e.clientY, dragSource.char);
+  e.currentTarget.classList.add('dragging');
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+}
+
+function onMouseMove(e) {
+  if (!isDragging) return;
+  moveGhost(e.clientX, e.clientY);
+  highlightSlotUnder(e.clientX, e.clientY);
+}
+
+function onMouseUp(e) {
+  if (!isDragging) return;
+  isDragging = false;
+  hideGhost();
+  clearSlotHighlights();
+  const slot = getSlotUnder(e.clientX, e.clientY);
+  if (slot) {
+    tryDrop(slot);
+  } else {
+    resetDrag();
+  }
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mouseup', onMouseUp);
+}
+
+function onTouchStart(e) {
+  if (e.target.classList.contains('used')) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  dragSource = {
+    char: e.currentTarget.dataset.char,
+    type: e.currentTarget.dataset.type,
+    itemEl: e.currentTarget
+  };
+  isDragging = true;
+  showGhost(touch.clientX, touch.clientY, dragSource.char);
+  e.currentTarget.classList.add('dragging');
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend', onTouchEnd);
+}
+
+function onTouchMove(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  moveGhost(touch.clientX, touch.clientY);
+  highlightSlotUnder(touch.clientX, touch.clientY);
+}
+
+function onTouchEnd(e) {
+  if (!isDragging) return;
+  isDragging = false;
+  const touch = e.changedTouches[0];
+  hideGhost();
+  clearSlotHighlights();
+  const slot = getSlotUnder(touch.clientX, touch.clientY);
+  if (slot) {
+    tryDrop(slot);
+  } else {
+    resetDrag();
+  }
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+}
+
+function showGhost(x, y, char) {
+  const g = document.getElementById('dragGhost');
+  g.style.display = 'flex';
+  g.textContent = char;
+  g.style.left = x + 'px';
+  g.style.top = y + 'px';
+}
+
+function moveGhost(x, y) {
+  const g = document.getElementById('dragGhost');
+  g.style.left = x + 'px';
+  g.style.top = y + 'px';
+}
+
+function hideGhost() {
+  document.getElementById('dragGhost').style.display = 'none';
+}
+
+function getSlotUnder(x, y) {
+  for (const s of currentSlots) {
+    if (s.filled) continue;
+    const rect = s.slotEl.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return s;
+    }
+  }
+  return null;
+}
+
+function highlightSlotUnder(x, y) {
+  clearSlotHighlights();
+  const s = getSlotUnder(x, y);
+  if (s) {
+    s.slotEl.classList.add('drag-over');
+    activeSlotHighlight = s;
+  }
+}
+
+function clearSlotHighlights() {
+  currentSlots.forEach(s => {
+    if (!s.filled) s.slotEl.classList.remove('drag-over');
+  });
+}
+
+function tryDrop(slotObj) {
+  if (!dragSource) return;
+
+  const droppedChar = dragSource.char;
+  const droppedType = dragSource.type;
+  const itemEl = dragSource.itemEl;
+  dragSource = null;
+
+  // Check if the dropped item matches the expected value AND correct position
+  const isCorrectValue = slotObj.expectedValue === droppedChar;
+  const isCorrectType = slotObj.type === droppedType;
+  const isCorrect = isCorrectValue && isCorrectType && slotObj.isCorrectPosition;
+
+  // Also handle: correct value but wrong position (e.g. dropped consonant in wrong slot)
+  const isCorrectValueWrongPosition = isCorrectValue && isCorrectType && !slotObj.isCorrectPosition;
+
+  itemEl.classList.remove('dragging');
+
+  if (isCorrect) {
+    // ✅ Correct position and value
+    slotObj.slotEl.textContent = droppedChar;
+    slotObj.slotEl.classList.remove('droppable', 'drag-over');
+    slotObj.slotEl.classList.add('filled', 'correct');
+    slotObj.filled = true;
+    itemEl.classList.add('used');
+
+    // Lock the sibling wrong-position slot for this syllable (same syllableIdx, same type, not correct position)
+    currentSlots.forEach(s => {
+      if (s.syllableIdx === slotObj.syllableIdx && s.type === slotObj.type && !s.isCorrectPosition && !s.filled) {
+        s.filled = true;
+        s.slotEl.classList.remove('droppable', 'drag-over');
+        s.slotEl.classList.add('filled', 'correct');
+        s.slotEl.textContent = '';
+        s.slotEl.style.background = '#f5f7fa';
+        s.slotEl.style.border = '2px dashed #dde3ea';
+        s.slotEl.style.opacity = '0.35';
+        s.slotEl.style.pointerEvents = 'none';
+      }
+    });
+
+    checkCompletion();
+  } else {
+    // ❌ Wrong — show X, then reveal correct answer
+    slotObj.slotEl.classList.add('wrong');
+    slotObj.slotEl.classList.remove('drag-over');
+    const xMark = document.createElement('span');
+    xMark.className = 'x-mark';
+    xMark.textContent = '✗';
+    slotObj.slotEl.appendChild(xMark);
+
+    // After 700ms, remove X and show correct answer
+    if (!questionHadWrong) {
+      questionHadWrong = true;
+    }
+    setTimeout(() => {
+      slotObj.slotEl.removeChild(xMark);
+      slotObj.slotEl.classList.remove('wrong', 'droppable', 'drag-over');
+      slotObj.slotEl.classList.add('revealed');
+
+      // Find the correct slot for this syllable/type and reveal there
+      // We reveal the answer in the CORRECT position slot
+      const correctSlot = currentSlots.find(s =>
+        s.syllableIdx === slotObj.syllableIdx &&
+        s.type === slotObj.type &&
+        s.isCorrectPosition &&
+        !s.filled
+      );
+
+      if (correctSlot) {
+        correctSlot.slotEl.textContent = correctSlot.expectedValue;
+        correctSlot.slotEl.classList.remove('droppable', 'drag-over');
+        correctSlot.slotEl.classList.add('revealed');
+        correctSlot.filled = true;
+      }
+
+      // Lock THIS slot too
+      slotObj.filled = true;
+      slotObj.slotEl.textContent = '';
+      slotObj.slotEl.style.background = '#f5f7fa';
+      slotObj.slotEl.style.border = '2px dashed #dde3ea';
+      slotObj.slotEl.style.opacity = '0.35';
+      slotObj.slotEl.style.pointerEvents = 'none';
+
+      // Mark source item as used
+      itemEl.classList.add('used');
+
+      checkCompletion();
+    }, 700);
+  }
+}
+
+function resetDrag() {
+  if (dragSource) {
+    dragSource.itemEl.classList.remove('dragging');
+    dragSource = null;
+  }
+}
+
+function checkCompletion() {
+  const allFilled = currentSlots.every(s => s.filled);
+  if (allFilled) {
+    questionsAnswered++;
+    if (questionHadWrong) {
+      scoreWrong++;
+    } else {
+      scoreCorrect++;
+    }
+    updateProgress();
+    const btnNext = document.getElementById('btnNext');
+    const levelDone = currentQuestion + 1 >= levels[currentLevel].questionCount;
+    const allDone = currentLevel >= levels.length - 1 && levelDone;
+    if (allDone) {
+      setTimeout(() => {
+        document.getElementById('mainContent').style.display = 'none';
+        // Update score display
+        document.getElementById('scoreCorrect').textContent = scoreCorrect;
+        document.getElementById('scoreWrong').textContent = scoreWrong;
+        const pct = Math.round((scoreCorrect / totalQuestions) * 100);
+        let msg = '';
+        if (pct === 100) msg = '완벽해요! 🌟 모든 문제를 처음에 맞췄어요!';
+        else if (pct >= 70) msg = `잘했어요! 😊 ${totalQuestions}문제 중 ${scoreCorrect}문제를 처음에 맞췄어요.`;
+        else msg = `계속 연습해요! 💪 ${totalQuestions}문제 중 ${scoreCorrect}문제를 처음에 맞췄어요.`;
+        document.getElementById('scoreMsg').innerHTML = msg;
+        document.getElementById('completionScreen').classList.add('visible');
+      }, 600);
+    } else {
+      btnNext.classList.add('visible');
+    }
+  }
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion >= levels[currentLevel].questionCount) {
+    currentLevel++;
+    currentQuestion = 0;
+  }
+  if (currentLevel >= levels.length) {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('completionScreen').classList.add('visible');
+    return;
+  }
+  renderQuestion();
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  const count = document.getElementById('progressCount');
+  const pct = Math.round((questionsAnswered / totalQuestions) * 100);
+  bar.style.width = pct + '%';
+  count.textContent = `${questionsAnswered} / ${totalQuestions}`;
+}
+
+function restartGame() {
+  currentLevel = 0;
+  currentQuestion = 0;
+  questionsAnswered = 0;
+  scoreCorrect = 0;
+  scoreWrong = 0;
+  questionHadWrong = false;
+  document.getElementById('completionScreen').classList.remove('visible');
+  document.getElementById('mainContent').style.display = 'block';
+  buildLevels();
+  renderQuestion();
+}
+
+// ============================================================
+// MUSIC ENGINE (Web Audio API - generated chiptune melody)
+// ============================================================
+let audioCtx = null;
+let musicPlaying = false;
+let masterGain = null;
+let musicTimeout = null;
+let currentNoteIdx = 0;
+
+// Cute pentatonic melody in C major
+const MELODY = [
+  // C5  E5  G5  A5  G5  E5  C5  D5  E5  G5  A5  C6  A5  G5  E5  G5
+  523, 659, 784, 880, 784, 659, 523, 587, 659, 784, 880, 1047, 880, 784, 659, 784,
+  // repeat with variation
+  523, 659, 784, 880, 1047, 880, 784, 659, 523, 587, 523, 659, 784, 659, 523, 392
+];
+
+const NOTE_DUR = 0.18; // seconds per note
+const NOTE_GAP = 0.04;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.4;
+  masterGain.connect(audioCtx.destination);
+}
+
+function playNote(freq, startTime, duration) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, startTime);
+
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(0.35, startTime + 0.02);
+  gainNode.gain.setValueAtTime(0.35, startTime + duration * 0.6);
+  gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+
+  // Add a subtle octave harmonic for warmth
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(freq * 2, startTime);
+  gain2.gain.setValueAtTime(0, startTime);
+  gain2.gain.linearRampToValueAtTime(0.08, startTime + 0.02);
+  gain2.gain.linearRampToValueAtTime(0, startTime + duration);
+
+  osc.connect(gainNode);
+  gainNode.connect(masterGain);
+  osc2.connect(gain2);
+  gain2.connect(masterGain);
+
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+  osc2.start(startTime);
+  osc2.stop(startTime + duration);
+}
+
+function scheduleMelody() {
+  if (!musicPlaying || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  // Schedule next 4 notes ahead
+  for (let i = 0; i < 4; i++) {
+    const idx = (currentNoteIdx + i) % MELODY.length;
+    const t = now + i * (NOTE_DUR + NOTE_GAP);
+    playNote(MELODY[idx], t, NOTE_DUR);
+  }
+  currentNoteIdx = (currentNoteIdx + 4) % MELODY.length;
+  // Schedule next batch
+  musicTimeout = setTimeout(scheduleMelody, 4 * (NOTE_DUR + NOTE_GAP) * 1000 - 50);
+}
+
+function toggleMusic() {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  musicPlaying = !musicPlaying;
+  const btn = document.getElementById('musicBtn');
+  const note = document.getElementById('musicNote');
+
+  if (musicPlaying) {
+    btn.textContent = '⏸';
+    btn.classList.add('playing');
+    note.textContent = '♪ đang phát...';
+    currentNoteIdx = 0;
+    scheduleMelody();
+  } else {
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    note.textContent = '♪ nhạc dễ thương';
+    clearTimeout(musicTimeout);
+  }
+}
+
+function setVolume(val) {
+  initAudio();
+  if (masterGain) {
+    masterGain.gain.value = val / 100 * 0.8;
+  }
+  const icon = document.querySelector('.volume-icon');
+  if (val == 0) icon.textContent = '🔇';
+  else if (val < 50) icon.textContent = '🔈';
+  else icon.textContent = '🔊';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildLevels();
+renderQuestion();
+</script>
+</body>
+</html>
