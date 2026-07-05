@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Luyện tập âm tiết không có phụ âm cuối</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --kr-font: 'Noto Sans KR', sans-serif;
+    --vi-font: 'Be Vietnam Pro', sans-serif;
+    --pink: #ec6f9b;
+    --pink-light: #fde3ee;
+    --pink-dark: #d84f80;
+    --blue: #6fa8dc;
+    --blue-light: #e5f1fb;
+    --purple: #a98fd6;
+    --purple-light: #f0e9fb;
+    --green: #4caf82;
+    --green-light: #e3f7ee;
+    --red: #e2664f;
+    --red-light: #fcebe8;
+    --gray: #9aa3ad;
+    --bg: #fbf7f2;
+    --card: #ffffff;
+    --text: #3a3a3a;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{
+    margin:0; padding:0; height:100%; width:100%;
+    background: linear-gradient(160deg,#fdf3ec 0%, #f3ecfb 55%, #eaf3fc 100%);
+    font-family: var(--vi-font);
+    color: var(--text);
+    overflow:hidden;
+  }
+  #app{ height:100vh; width:100vw; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .screen{ width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .hidden{ display:none !important; }
+
+  /* ---------- START SCREEN ---------- */
+  #screen-start .start-card{
+    background: var(--card);
+    border-radius: 32px;
+    padding: clamp(28px,4vh,52px) clamp(24px,5vw,60px);
+    box-shadow: 0 18px 45px rgba(180,140,170,0.25);
+    text-align:center;
+    max-width: 92vw;
+    width: 560px;
+  }
+  #screen-start h1{
+    font-family: var(--vi-font);
+    font-weight:700;
+    font-size: clamp(20px, 3vw, 30px);
+    color: var(--pink-dark);
+    margin: 0 0 clamp(18px,3vh,30px) 0;
+    line-height:1.35;
+  }
+  #screen-start .kr-deco{
+    font-family: var(--kr-font);
+    font-size: clamp(30px,5vw,46px);
+    color: var(--purple);
+    margin-bottom: 14px;
+    font-weight:700;
+  }
+  #screen-start label{
+    display:block;
+    font-size: clamp(15px,2vw,18px);
+    font-weight:600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  #name-input{
+    width:100%;
+    font-family: var(--vi-font);
+    font-size: clamp(16px,2.2vw,20px);
+    padding: 14px 18px;
+    border-radius:16px;
+    border: 2px solid var(--pink-light);
+    outline:none;
+    text-align:center;
+    margin-bottom: 22px;
+    background: var(--pink-light);
+    color: var(--text);
+    font-weight:600;
+  }
+  #name-input:focus{ border-color: var(--pink); }
+  #btn-start{
+    font-family: var(--vi-font);
+    font-weight:700;
+    font-size: clamp(17px,2.4vw,21px);
+    color:#fff;
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+    border:none;
+    padding: 14px 46px;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 10px 22px rgba(216,79,128,0.35);
+    transition: transform .15s ease;
+  }
+  #btn-start:active{ transform: scale(0.96); }
+  #start-warning{ color:var(--red); font-size:14px; margin-top:10px; min-height:18px; font-weight:600; }
+
+  /* ---------- GAME SCREEN ---------- */
+  #screen-game{ padding: clamp(10px,2vh,22px) clamp(10px,3vw,30px); }
+  #top-bar{
+    width:100%; max-width: 980px;
+    display:flex; align-items:center; gap:14px;
+    margin-bottom: clamp(10px,2vh,20px);
+  }
+  #progress-outer{
+    flex:1; height: 16px; background:#fff;
+    border-radius: 999px; overflow:hidden;
+    box-shadow: inset 0 0 0 2px var(--pink-light);
+  }
+  #progress-inner{
+    height:100%; width:0%;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    border-radius:999px;
+    transition: width .35s ease;
+  }
+  #progress-label{
+    font-size: clamp(13px,1.6vw,16px);
+    font-weight:700;
+    color: var(--pink-dark);
+    white-space:nowrap;
+  }
+  #student-tag{
+    font-size: clamp(12px,1.5vw,14px);
+    font-weight:600;
+    color: var(--purple);
+    background: var(--purple-light);
+    padding: 6px 14px;
+    border-radius: 999px;
+    white-space:nowrap;
+  }
+
+  #question-area{
+    flex:1;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:100%; max-width: 980px;
+    min-height: 0;
+  }
+  #instruction-line{
+    font-size: clamp(13px,1.8vw,17px);
+    color: var(--gray);
+    font-weight:600;
+    margin-bottom: clamp(10px,2vh,18px);
+    text-align:center;
+  }
+  #meaning-hint{
+    font-size: clamp(13px,1.8vw,16px);
+    color: var(--purple);
+    font-weight:600;
+    margin-top: clamp(8px,1.6vh,14px);
+    text-align:center;
+    min-height: 20px;
+  }
+
+  #puzzle-row{
+    display:flex; align-items:flex-start; justify-content:center;
+    gap: clamp(14px,3vw,34px);
+    flex-wrap: wrap;
+  }
+  .syll-column{
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .prompt-label{
+    font-family: var(--kr-font);
+    font-weight: 900;
+    font-size: clamp(30px, 5.5vw, 48px);
+    color: #4a3f6b;
+    margin-bottom: clamp(6px,1.2vh,14px);
+    line-height:1;
+  }
+  .syll-block{
+    display:grid;
+    grid-template-columns: var(--cell-size) var(--cell-size);
+    grid-template-rows: var(--cell-size) var(--cell-size);
+    gap: clamp(5px,0.8vw,8px);
+    background: rgba(255,255,255,0.5);
+    padding: clamp(6px,1vw,10px);
+    border-radius: 22px;
+  }
+  .cell{
+    width: var(--cell-size); height: var(--cell-size);
+    border-radius: 16px;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--kr-font);
+    font-weight:700;
+    font-size: calc(var(--cell-size) * 0.46);
+    position:relative;
+    user-select:none;
+  }
+  .cell-blank-space{ background:none; visibility:hidden; }
+  .cell-active-empty{
+    border: 3px dashed var(--gray);
+    background: #ffffff;
+    color: transparent;
+  }
+  .cell-active-empty.drag-over{
+    border-color: var(--pink);
+    background: var(--pink-light);
+    transform: scale(1.04);
+  }
+  .cell-neutral-empty{
+    border: 3px dashed #cfcfcf;
+    background: #f5f5f5;
+    color: var(--gray);
+    font-size: calc(var(--cell-size) * 0.3);
+  }
+  .cell-given{
+    background: var(--blue-light);
+    color: var(--blue);
+    border: 3px solid var(--blue-light);
+  }
+  .cell-filled{
+    background: var(--pink-light);
+    color: var(--pink-dark);
+    border: 3px solid var(--pink);
+  }
+  .cell-correct{
+    background: var(--green-light) !important;
+    color: var(--green) !important;
+    border: 3px solid var(--green) !important;
+  }
+  .cell-incorrect{
+    background: var(--red-light) !important;
+    color: var(--red) !important;
+    border: 3px solid var(--red) !important;
+  }
+  .cell-mark{
+    position:absolute; top:-12px; right:-12px;
+    width: 26px; height:26px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:900; color:#fff;
+    font-family: var(--vi-font);
+  }
+  .cell-mark.ok{ background: var(--green); }
+  .cell-mark.no{ background: var(--red); }
+  .cell-remove-btn{
+    position:absolute; top:-10px; right:-10px;
+    width: 24px; height:24px; border-radius:50%;
+    background: var(--gray); color:#fff; border:none;
+    font-size:14px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    line-height:1;
+    font-family: var(--vi-font);
+  }
+  .correct-hint{
+    position:absolute; bottom:-22px; left:50%; transform:translateX(-50%);
+    font-size: 12px; font-family: var(--vi-font); font-weight:600;
+    color: var(--green); white-space:nowrap;
+  }
+
+  /* ---------- TILE TRAYS ---------- */
+  #tile-trays{
+    width:100%; max-width: 980px;
+    display:flex; flex-direction:column; gap: clamp(8px,1.4vh,14px);
+    margin-top: clamp(10px,2vh,20px);
+  }
+  .tray{
+    display:flex; align-items:center; justify-content:center;
+    gap: clamp(8px,1.6vw,16px);
+    flex-wrap:wrap;
+    background: rgba(255,255,255,0.55);
+    border-radius: 22px;
+    padding: clamp(8px,1.4vh,14px);
+    min-height: var(--tile-size);
+  }
+  .tile{
+    width: var(--tile-size); height: var(--tile-size);
+    border-radius: 16px;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--kr-font);
+    font-weight:700;
+    font-size: calc(var(--tile-size) * 0.46);
+    cursor: grab;
+    touch-action: none;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.10);
+    transition: transform .1s ease, opacity .15s ease;
+  }
+  .tile:active{ cursor:grabbing; }
+  .tile.consonant-tile{ background: #fff; color: var(--pink-dark); border: 3px solid var(--pink); }
+  .tile.vowel-tile{ background:#fff; color: var(--purple); border: 3px solid var(--purple); }
+  .tile.tile-used{ opacity:0; pointer-events:none; }
+  .tile.ghost{
+    position:fixed; z-index:999; pointer-events:none;
+    box-shadow: 0 14px 26px rgba(0,0,0,0.22);
+    transform: scale(1.08);
+  }
+
+  /* ---------- ACTION BUTTONS ---------- */
+  #action-buttons{
+    margin-top: clamp(10px,2vh,20px);
+    min-height: 56px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .main-btn{
+    font-family: var(--vi-font);
+    font-weight:700;
+    font-size: clamp(16px,2.2vw,20px);
+    color:#fff;
+    border:none;
+    padding: 13px 40px;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+    transition: transform .15s ease;
+  }
+  .main-btn:active{ transform: scale(0.96); }
+  #btn-confirm{ background: linear-gradient(135deg, var(--blue), #4f8fce); }
+  #btn-next{ background: linear-gradient(135deg, var(--pink), var(--pink-dark)); }
+
+  /* ---------- END SCREEN ---------- */
+  #screen-end{
+    padding: clamp(16px,3vh,30px);
+    overflow-y:auto;
+  }
+  .end-card{
+    background: var(--card);
+    border-radius: 32px;
+    padding: clamp(24px,4vh,40px) clamp(20px,5vw,48px);
+    box-shadow: 0 18px 45px rgba(180,140,170,0.25);
+    max-width: 720px; width:92vw;
+    text-align:center;
+  }
+  .end-card h2{
+    font-family: var(--vi-font);
+    font-size: clamp(20px,3vw,28px);
+    color: var(--pink-dark);
+    margin: 0 0 8px 0;
+  }
+  .end-score{
+    font-size: clamp(30px,5vw,46px);
+    font-weight:900;
+    color: var(--purple);
+    margin: 10px 0 20px 0;
+    font-family: var(--vi-font);
+  }
+  .end-score span{ color: var(--pink-dark); }
+  #review-list{
+    text-align:left;
+    max-height: 44vh;
+    overflow-y:auto;
+    margin-top: 10px;
+    padding-right: 6px;
+  }
+  .review-item{
+    background: var(--red-light);
+    border-radius: 16px;
+    padding: 12px 18px;
+    margin-bottom: 10px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .review-hangul{
+    font-family: var(--kr-font);
+    font-weight:700;
+    font-size: clamp(20px,3vw,26px);
+    color: var(--pink-dark);
+  }
+  .review-pron{
+    font-size: clamp(13px,1.8vw,15px);
+    color: var(--text);
+    font-weight:500;
+  }
+  .review-meaning{
+    font-size: clamp(13px,1.8vw,15px);
+    color: var(--purple);
+    font-weight:600;
+  }
+  .no-mistake{
+    font-size: clamp(15px,2vw,18px);
+    color: var(--green);
+    font-weight:700;
+    margin-top: 16px;
+  }
+  #btn-restart{
+    margin-top: 22px;
+    font-family: var(--vi-font);
+    font-weight:700;
+    font-size: clamp(15px,2vw,18px);
+    color:#fff;
+    background: linear-gradient(135deg, var(--purple), #8a6fc0);
+    border:none;
+    padding: 12px 34px;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START SCREEN -->
+  <div id="screen-start" class="screen">
+    <div class="start-card">
+      <div class="kr-deco">가 나 다</div>
+      <h1>Luyện tập tạo âm tiết<br>không có phụ âm cuối</h1>
+      <label for="name-input">Nhập tên của em</label>
+      <input type="text" id="name-input" placeholder="Ví dụ: Minh Anh" maxlength="30">
+      <div><button id="btn-start">Bắt đầu</button></div>
+      <div id="start-warning"></div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="screen-game" class="screen hidden">
+    <div id="top-bar">
+      <div id="student-tag"></div>
+      <div id="progress-outer"><div id="progress-inner"></div></div>
+      <div id="progress-label"></div>
+    </div>
+    <div id="question-area">
+      <div id="instruction-line"></div>
+      <div id="puzzle-row"></div>
+      <div id="meaning-hint"></div>
+    </div>
+    <div id="tile-trays">
+      <div id="vowel-tray" class="tray hidden"></div>
+      <div id="consonant-tray" class="tray"></div>
+    </div>
+    <div id="action-buttons">
+      <button id="btn-confirm" class="main-btn hidden">확인하기 ✓</button>
+      <button id="btn-next" class="main-btn hidden">다음 문제 →</button>
+    </div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="screen-end" class="screen hidden">
+    <div class="end-card">
+      <h2 id="end-title"></h2>
+      <div class="end-score" id="end-score"></div>
+      <div id="review-list"></div>
+      <button id="btn-restart">Chơi lại</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= HANGUL UTILS ================= */
+const CHO_LIST = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG_LIST = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+
+const ALL_CONSONANTS = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const ALL_VOWELS = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+const DOC_VOWELS = ['ㅏ','ㅑ','ㅓ','ㅕ','ㅣ'];
+const NGANG_VOWELS = ['ㅗ','ㅛ','ㅜ','ㅠ','ㅡ'];
+
+function decompose(ch){
+  const code = ch.charCodeAt(0) - 0xAC00;
+  if(code < 0 || code > 11171) return null;
+  const cho = Math.floor(code/(21*28));
+  const jung = Math.floor((code%(21*28))/28);
+  const jong = code%28;
+  return { choChar: CHO_LIST[cho], jungChar: JUNG_LIST[jung], jongIdx: jong };
+}
+function vowelType(jungChar){
+  if(DOC_VOWELS.indexOf(jungChar) !== -1) return 'doc';
+  if(NGANG_VOWELS.indexOf(jungChar) !== -1) return 'ngang';
+  return null;
+}
+function composeSyllable(choChar, jungChar){
+  const choIdx = CHO_LIST.indexOf(choChar);
+  const jungIdx = JUNG_LIST.indexOf(jungChar);
+  const code = 0xAC00 + (choIdx*21 + jungIdx)*28;
+  return String.fromCharCode(code);
+}
+
+/* ================= DATA ================= */
+const syllableData = [
+{h:'가',p:'[ka/kha - k/kh nhẹ]'},{h:'캬',p:'[khya - kh bật hơi]'},{h:'거',p:'[ko/kho - k/kh nhẹ]'},
+{h:'켜',p:'[khyo - kh bật hơi]'},{h:'고',p:'[kô/khô - k/kh nhẹ]'},{h:'쿄',p:'[khyô - kh bật hơi]'},
+{h:'두',p:'[tu - t nhẹ]'},{h:'튜',p:'[thyu - th bật hơi]'},{h:'드',p:'[tư - t nhẹ]'},{h:'티',p:'[thi - th bật hơi]'},
+{h:'자',p:'[cha - ch nhẹ]'},{h:'챠',p:'[chya - ch bật hơi]'},{h:'저',p:'[cho - ch nhẹ]'},{h:'쳐',p:'[chyo - ch bật hơi]'},
+{h:'보',p:'[bô/pô - b/p nhẹ]'},{h:'표',p:'[pyô - p bật hơi]'},{h:'부',p:'[bu/pu - b/p nhẹ]'},{h:'퓨',p:'[pyu - p bật hơi]'},
+{h:'브',p:'[bư/pư - b/p nhẹ]'},{h:'피',p:'[pi - p bật hơi]'},
+{h:'나',p:'[na]'},{h:'냐',p:'[nya]'},{h:'머',p:'[mo]'},{h:'며',p:'[myo]'},{h:'소',p:'[xô - x nhẹ]'},
+{h:'쇼',p:'[xyô - x nhẹ]'},{h:'우',p:'[u]'},{h:'유',p:'[yu]'},{h:'흐',p:'[hư]'},{h:'히',p:'[hi]'},
+{h:'라',p:'[ra/la]'},{h:'랴',p:'[rya/lya]'},{h:'러',p:'[ro/lo]'},{h:'려',p:'[ryo/lyo]'},{h:'로',p:'[rô/lô]'},
+{h:'료',p:'[ryô/lyô]'},{h:'루',p:'[ru/lu]'},{h:'류',p:'[ryu/lyu]'},{h:'르',p:'[rư/lư]'},{h:'리',p:'[ri/li]'},
+{h:'기',p:'[ki/khi - k/kh nhẹ]'},{h:'코',p:'[khô - kh bật hơi]'},{h:'다',p:'[ta - t nhẹ]'},{h:'터',p:'[tho - th bật hơi]'},
+{h:'주',p:'[chu - ch nhẹ]'},{h:'치',p:'[chi - ch bật hơi]'},{h:'바',p:'[ba/pa - b/p nhẹ]'},{h:'파',p:'[pa - p bật hơi]'},
+{h:'사',p:'[xa - x nhẹ]'}
+];
+
+const vocab2Data = [
+{h:'바보',p:'[ba bô/pa pô - b/p đọc nhẹ]',m:'đồ ngốc'},
+{h:'피자',p:'[pi cha - p bật hơi, ch đọc nhẹ]',m:'bánh pizza'},
+{h:'파도',p:'[pa tô - p bật hơi, t đọc nhẹ]',m:'sóng biển'},
+{h:'치즈',p:'[chi chư - ch bật hơi, ch đọc nhẹ]',m:'phô mai'},
+{h:'부자',p:'[bu cha/pu cha - b/p đọc nhẹ, ch đọc nhẹ]',m:'người giàu'},
+{h:'머리',p:'[mo ri]',m:'cái đầu / tóc'},
+{h:'다리',p:'[ta ri - t đọc nhẹ]',m:'cái chân / cây cầu'},
+{h:'모자',p:'[mô cha - ch đọc nhẹ]',m:'cái mũ (nón)'},
+{h:'하트',p:'[ha thư - th bật hơi]',m:'trái tim (biểu tượng heart)'},
+{h:'우유',p:'[u yu]',m:'sữa (sữa bò)'},
+{h:'미소',p:'[mi xô - x đọc nhẹ]',m:'nụ cười'},
+{h:'거미',p:'[ko mi/kho mi - k/kh đọc nhẹ]',m:'con nhện'}
+];
+
+const vocab3Data = [
+{h:'기차표',p:'[ki cha pyô/khi cha pyô - k/kh đọc nhẹ, ch bật hơi, p bật hơi]',m:'vé tàu hỏa'},
+{h:'피아노',p:'[pi a nô - p bật hơi]',m:'đàn piano'},
+{h:'아버지',p:'[a bo chi/a po chi - b/p đọc nhẹ, ch đọc nhẹ]',m:'bố / ba'},
+{h:'어머니',p:'[o mo ni]',m:'mẹ / má'},
+{h:'소나무',p:'[xô na mu - x đọc nhẹ]',m:'cây thông'},
+{h:'라디오',p:'[la ti ô - t đọc nhẹ]',m:'đài radio'},
+{h:'도토리',p:'[tô thô ri - t đọc nhẹ, th bật hơi]',m:'quả sồi'},
+{h:'마이크',p:'[ma i khư - kh bật hơi]',m:'cái micro (mic)'},
+{h:'주머니',p:'[chu mo ni - ch đọc nhẹ]',m:'cái túi (túi áo/quần)'},
+{h:'주사기',p:'[chu xa ki/chu xa khi - ch đọc nhẹ, x đọc nhẹ, k/kh đọc nhẹ]',m:'ống tiêm'}
+];
+
+/* ================= HELPERS ================= */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function sampleDistinct(pool, count){
+  return shuffle(pool).slice(0, count);
+}
+
+function buildSyllableItem(hangulChar){
+  const d = decompose(hangulChar);
+  return { hangul: hangulChar, choChar: d.choChar, jungChar: d.jungChar, vType: vowelType(d.jungChar) };
+}
+function buildWordItems(word){
+  return word.split('').map(buildSyllableItem);
+}
+
+/* ================= QUESTION GENERATION ================= */
+let syllablePool = shuffle(syllableData);
+let vocab2Pool = shuffle(vocab2Data);
+let vocab3Pool = shuffle(vocab3Data);
+
+function takeFrom(poolArr, n){
+  const taken = poolArr.splice(0, n);
+  return taken;
+}
+
+function makeSyllableQuestion(entry, vowelGiven){
+  const items = [ buildSyllableItem(entry.h) ];
+  return { kind:'syllable', vowelGiven, items, pron: entry.p, meaning: null, fullHangul: entry.h };
+}
+function makeWordQuestion(entry, vowelGiven){
+  const items = buildWordItems(entry.h);
+  return { kind:'word', vowelGiven, items, pron: entry.p, meaning: entry.m, fullHangul: entry.h };
+}
+
+function generateAllQuestions(){
+  syllablePool = shuffle(syllableData);
+  vocab2Pool = shuffle(vocab2Data);
+  vocab3Pool = shuffle(vocab3Data);
+
+  const qs = [];
+  // Level 1: 6 câu, 1 âm tiết, cho sẵn nguyên âm
+  takeFrom(syllablePool,6).forEach(e => qs.push(makeSyllableQuestion(e, true)));
+  // Level 2: 4 câu, 2 âm tiết, cho sẵn nguyên âm
+  takeFrom(vocab2Pool,4).forEach(e => qs.push(makeWordQuestion(e, true)));
+  // Level 3: 3 câu, 3 âm tiết, cho sẵn nguyên âm
+  takeFrom(vocab3Pool,3).forEach(e => qs.push(makeWordQuestion(e, true)));
+  // Level 4: 4 câu, 1 âm tiết, không cho nguyên âm
+  takeFrom(syllablePool,4).forEach(e => qs.push(makeSyllableQuestion(e, false)));
+  // Level 5: 3 câu, 2 âm tiết, không cho nguyên âm
+  takeFrom(vocab2Pool,3).forEach(e => qs.push(makeWordQuestion(e, false)));
+  // Level 6: 2 câu, 3 âm tiết, không cho nguyên âm
+  takeFrom(vocab3Pool,2).forEach(e => qs.push(makeWordQuestion(e, false)));
+
+  return qs;
+}
+
+/* ================= GAME STATE ================= */
+let studentName = '';
+let allQuestions = [];
+let currentIndex = 0;
+let currentConsonantGroups = []; // {topEl, leftEl, correctPos:'top'|'left', correctJamo}
+let currentVowelCells = []; // cellEl list, each has dataset.correctJamo
+let confirmed = false;
+let results = []; // {question, correct}
+
+/* ================= DOM refs ================= */
+const screenStart = document.getElementById('screen-start');
+const screenGame = document.getElementById('screen-game');
+const screenEnd = document.getElementById('screen-end');
+const nameInput = document.getElementById('name-input');
+const btnStart = document.getElementById('btn-start');
+const startWarning = document.getElementById('start-warning');
+const studentTag = document.getElementById('student-tag');
+const progressInner = document.getElementById('progress-inner');
+const progressLabel = document.getElementById('progress-label');
+const instructionLine = document.getElementById('instruction-line');
+const puzzleRow = document.getElementById('puzzle-row');
+const meaningHint = document.getElementById('meaning-hint');
+const vowelTray = document.getElementById('vowel-tray');
+const consonantTray = document.getElementById('consonant-tray');
+const btnConfirm = document.getElementById('btn-confirm');
+const btnNext = document.getElementById('btn-next');
+const endTitle = document.getElementById('end-title');
+const endScore = document.getElementById('end-score');
+const reviewList = document.getElementById('review-list');
+const btnRestart = document.getElementById('btn-restart');
+
+function setCellSizeVars(){
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const cell = Math.max(46, Math.min(84, Math.floor(Math.min(vw*0.10, vh*0.11))));
+  const tile = Math.max(44, Math.min(72, Math.floor(Math.min(vw*0.09, vh*0.09))));
+  document.documentElement.style.setProperty('--cell-size', cell+'px');
+  document.documentElement.style.setProperty('--tile-size', tile+'px');
+}
+window.addEventListener('resize', setCellSizeVars);
+setCellSizeVars();
+
+/* ================= START ================= */
+btnStart.addEventListener('click', startGame);
+nameInput.addEventListener('keydown', e => { if(e.key === 'Enter') startGame(); });
+
+function startGame(){
+  const name = nameInput.value.trim();
+  if(!name){
+    startWarning.textContent = 'Em ơi, hãy nhập tên trước khi bắt đầu nhé!';
+    return;
+  }
+  startWarning.textContent = '';
+  studentName = name;
+  allQuestions = generateAllQuestions();
+  currentIndex = 0;
+  results = [];
+  studentTag.textContent = '👤 ' + studentName;
+  screenStart.classList.add('hidden');
+  screenGame.classList.remove('hidden');
+  renderQuestion();
+}
+
+btnRestart.addEventListener('click', () => {
+  screenEnd.classList.add('hidden');
+  screenStart.classList.remove('hidden');
+  nameInput.value = '';
+});
+
+/* ================= RENDER QUESTION ================= */
+function renderQuestion(){
+  confirmed = false;
+  currentConsonantGroups = [];
+  currentVowelCells = [];
+  puzzleRow.innerHTML = '';
+  consonantTray.innerHTML = '';
+  vowelTray.innerHTML = '';
+  btnConfirm.classList.add('hidden');
+  btnNext.classList.add('hidden');
+  meaningHint.textContent = '';
+
+  const total = allQuestions.length;
+  progressLabel.textContent = 'Câu ' + (currentIndex+1) + '/' + total;
+  progressInner.style.width = Math.round((currentIndex/total)*100) + '%';
+
+  const q = allQuestions[currentIndex];
+
+  const needsVowelDrag = !q.vowelGiven;
+  instructionLine.textContent = needsVowelDrag
+    ? 'Nhìn chữ mẫu, kéo đúng phụ âm và nguyên âm vào ô trống nhé!'
+    : 'Nhìn chữ mẫu, kéo đúng phụ âm vào đúng vị trí nhé!';
+
+  vowelTray.classList.toggle('hidden', !needsVowelDrag);
+
+  const consonantRequired = [];
+  const vowelRequired = [];
+
+  q.items.forEach((item, idx) => {
+    const column = document.createElement('div');
+    column.className = 'syll-column';
+
+    // Prompt / "đề": always show the target syllable so students know what to build
+    const promptLabel = document.createElement('div');
+    promptLabel.className = 'prompt-label';
+    promptLabel.textContent = item.hangul;
+    column.appendChild(promptLabel);
+
+    const block = document.createElement('div');
+    block.className = 'syll-block';
+
+    // top-left is always empty space (structural only)
+    const topLeft = document.createElement('div');
+    topLeft.className = 'cell cell-blank-space';
+    block.appendChild(topLeft);
+
+    const isNgang = item.vType === 'ngang';
+    const correctPos = isNgang ? 'top' : 'left';
+
+    // TOP cell -- ALWAYS interactive (consonant slot candidate)
+    const topCell = document.createElement('div');
+    topCell.className = 'cell cell-active-empty';
+    block.appendChild(topCell);
+
+    // LEFT cell -- ALWAYS interactive (consonant slot candidate)
+    const leftCell = document.createElement('div');
+    leftCell.className = 'cell cell-active-empty';
+    block.appendChild(leftCell);
+
+    currentConsonantGroups.push({ topEl: topCell, leftEl: leftCell, correctPos, correctJamo: item.choChar });
+    consonantRequired.push(item.choChar);
+
+    // CENTER cell (vowel)
+    const centerCell = document.createElement('div');
+    centerCell.className = 'cell';
+    if(q.vowelGiven){
+      centerCell.classList.add('cell-given');
+      centerCell.textContent = item.jungChar;
+    } else {
+      centerCell.classList.add('cell-active-empty');
+      centerCell.dataset.correctJamo = item.jungChar;
+      currentVowelCells.push(centerCell);
+      vowelRequired.push(item.jungChar);
+    }
+    block.appendChild(centerCell);
+
+    column.appendChild(block);
+    puzzleRow.appendChild(column);
+  });
+
+  // Build tile pools
+  buildTray(consonantTray, consonantRequired, ALL_CONSONANTS, 'consonant-tile');
+  if(needsVowelDrag){
+    buildTray(vowelTray, vowelRequired, ALL_VOWELS, 'vowel-tile');
+  }
+}
+
+function buildTray(trayEl, requiredMultiset, allOptions, tileClass){
+  const distinctRequired = Array.from(new Set(requiredMultiset));
+  const distractorPoolSource = allOptions.filter(c => distinctRequired.indexOf(c) === -1);
+  const maxTotal = allOptions.length;
+  let distractorCount = Math.min(4, distractorPoolSource.length, Math.max(0, maxTotal - requiredMultiset.length));
+  const distractors = sampleDistinct(distractorPoolSource, distractorCount);
+  const tileValues = shuffle(requiredMultiset.concat(distractors));
+
+  tileValues.forEach((val, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'tile ' + tileClass;
+    tile.textContent = val;
+    tile.dataset.jamo = val;
+    tile.dataset.tileid = tileClass + '-' + i + '-' + Math.random().toString(36).slice(2);
+    attachDragSource(tile);
+    trayEl.appendChild(tile);
+  });
+}
+
+/* ================= DRAG & DROP (pointer-based) ================= */
+let dragState = null;
+
+function attachDragSource(tile){
+  tile.addEventListener('pointerdown', (e) => {
+    if(confirmed) return;
+    if(tile.classList.contains('tile-used')) return;
+    e.preventDefault();
+    const rect = tile.getBoundingClientRect();
+    const ghost = tile.cloneNode(true);
+    ghost.classList.add('ghost');
+    ghost.style.width = rect.width + 'px';
+    ghost.style.height = rect.height + 'px';
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    document.body.appendChild(ghost);
+
+    dragState = {
+      sourceTile: tile,
+      ghost: ghost,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+      currentHoverCell: null
+    };
+    tile.style.opacity = '0.25';
+
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+  });
+}
+
+function onPointerMove(e){
+  if(!dragState) return;
+  const g = dragState.ghost;
+  g.style.left = (e.clientX - dragState.offsetX) + 'px';
+  g.style.top = (e.clientY - dragState.offsetY) + 'px';
+
+  g.style.pointerEvents = 'none';
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const cell = under ? under.closest('.cell-active-empty') : null;
+
+  if(dragState.currentHoverCell && dragState.currentHoverCell !== cell){
+    dragState.currentHoverCell.classList.remove('drag-over');
+  }
+  if(cell && !cell.dataset.filled){
+    cell.classList.add('drag-over');
+    dragState.currentHoverCell = cell;
+  } else {
+    dragState.currentHoverCell = null;
+  }
+}
+
+function onPointerUp(e){
+  if(!dragState) return;
+  document.removeEventListener('pointermove', onPointerMove);
+  document.removeEventListener('pointerup', onPointerUp);
+
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const cell = under ? under.closest('.cell-active-empty') : null;
+
+  if(dragState.currentHoverCell) dragState.currentHoverCell.classList.remove('drag-over');
+  dragState.ghost.remove();
+
+  if(cell && !cell.dataset.filled){
+    placeTileInCell(cell, dragState.sourceTile);
+  } else {
+    dragState.sourceTile.style.opacity = '1';
+  }
+  dragState = null;
+}
+
+function placeTileInCell(cellEl, tile){
+  const jamo = tile.dataset.jamo;
+  cellEl.dataset.filled = jamo;
+  cellEl.dataset.tileid = tile.dataset.tileid;
+  cellEl.classList.remove('cell-active-empty');
+  cellEl.classList.add('cell-filled');
+  cellEl.textContent = jamo;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'cell-remove-btn';
+  removeBtn.textContent = '✕';
+  removeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+  removeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    retrieveTile(cellEl);
+  });
+  cellEl.appendChild(removeBtn);
+
+  tile.classList.add('tile-used');
+  tile.style.opacity = '';
+
+  checkAllFilled();
+}
+
+function retrieveTile(cellEl){
+  if(confirmed) return;
+  const tileId = cellEl.dataset.tileid;
+  const tile = document.querySelector('[data-tileid="'+tileId+'"].tile');
+  if(tile) tile.classList.remove('tile-used');
+
+  cellEl.textContent = '';
+  cellEl.classList.remove('cell-filled');
+  cellEl.classList.add('cell-active-empty');
+  delete cellEl.dataset.filled;
+  delete cellEl.dataset.tileid;
+  const btn = cellEl.querySelector('.cell-remove-btn');
+  if(btn) btn.remove();
+
+  btnConfirm.classList.add('hidden');
+}
+
+function checkAllFilled(){
+  const consonantsReady = currentConsonantGroups.every(g => g.topEl.dataset.filled || g.leftEl.dataset.filled);
+  const vowelsReady = currentVowelCells.every(c => c.dataset.filled);
+  btnConfirm.classList.toggle('hidden', !(consonantsReady && vowelsReady));
+}
+
+/* ================= CONFIRM / SCORING ================= */
+function clearRemoveBtn(cellEl){
+  const oldBtn = cellEl.querySelector('.cell-remove-btn');
+  if(oldBtn) oldBtn.remove();
+}
+function addMark(cellEl, ok){
+  const mark = document.createElement('div');
+  mark.className = 'cell-mark ' + (ok ? 'ok' : 'no');
+  mark.textContent = ok ? '✓' : '✕';
+  cellEl.appendChild(mark);
+}
+// Reveals the correct answer in a "must be filled" cell (vowel cell, or the correct-position consonant cell).
+// Shows GREEN+check whenever the user's attempt here was correct, OR the cell was simply left empty
+// (meaning the tile was mistakenly placed in the other candidate cell instead).
+// Shows RED+X only when the user actually placed the WRONG jamo in this exact cell.
+function revealAnswerCell(cellEl, correctJamo){
+  const filledVal = cellEl.dataset.filled || null;
+  const scoreOk = filledVal === correctJamo;
+  const displayGreen = scoreOk || filledVal === null;
+  clearRemoveBtn(cellEl);
+  cellEl.classList.remove('cell-filled','cell-active-empty');
+  cellEl.classList.add(displayGreen ? 'cell-correct' : 'cell-incorrect');
+  cellEl.textContent = correctJamo;
+  addMark(cellEl, displayGreen);
+  return scoreOk;
+}
+// Checks the "other position" consonant cell, which should have been left empty
+function revealSecondaryCell(cellEl){
+  const wasFilled = !!cellEl.dataset.filled;
+  clearRemoveBtn(cellEl);
+  if(wasFilled){
+    cellEl.classList.remove('cell-filled');
+    cellEl.classList.add('cell-incorrect');
+    addMark(cellEl, false);
+    return false;
+  } else {
+    cellEl.classList.remove('cell-active-empty');
+    cellEl.classList.add('cell-neutral-empty');
+    cellEl.textContent = '—';
+    return true;
+  }
+}
+
+btnConfirm.addEventListener('click', () => {
+  confirmed = true;
+  btnConfirm.classList.add('hidden');
+
+  let allCorrect = true;
+
+  currentConsonantGroups.forEach(g => {
+    const correctEl = g.correctPos === 'top' ? g.topEl : g.leftEl;
+    const otherEl = g.correctPos === 'top' ? g.leftEl : g.topEl;
+
+    const okOther = revealSecondaryCell(otherEl);
+    const okCorrect = revealAnswerCell(correctEl, g.correctJamo);
+    if(!okOther || !okCorrect) allCorrect = false;
+  });
+
+  currentVowelCells.forEach(c => {
+    const ok = revealAnswerCell(c, c.dataset.correctJamo);
+    if(!ok) allCorrect = false;
+  });
+
+  const q = allQuestions[currentIndex];
+  results.push({ question: q, correct: allCorrect });
+
+  let hint = 'Phiên âm: ' + q.pron;
+  if(q.meaning) hint += '  •  Nghĩa: ' + q.meaning;
+  meaningHint.textContent = hint;
+
+  btnNext.classList.remove('hidden');
+});
+
+btnNext.addEventListener('click', () => {
+  currentIndex++;
+  if(currentIndex >= allQuestions.length){
+    showEndScreen();
+  } else {
+    renderQuestion();
+  }
+});
+
+/* ================= END SCREEN ================= */
+function showEndScreen(){
+  progressInner.style.width = '100%';
+  screenGame.classList.add('hidden');
+  screenEnd.classList.remove('hidden');
+
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+
+  endTitle.textContent = studentName + ' ơi, hoàn thành rồi!';
+  endScore.innerHTML = 'Đúng <span>' + correctCount + '</span> / ' + total + ' câu';
+
+  reviewList.innerHTML = '';
+  const wrongOnes = results.filter(r => !r.correct);
+
+  if(wrongOnes.length === 0){
+    const p = document.createElement('div');
+    p.className = 'no-mistake';
+    p.textContent = '🎉 Xuất sắc! Em không sai câu nào cả!';
+    reviewList.appendChild(p);
+  } else {
+    const label = document.createElement('div');
+    label.style.fontWeight = '700';
+    label.style.marginBottom = '10px';
+    label.style.color = '#3a3a3a';
+    label.textContent = 'Cùng xem lại các câu chưa đúng để rút kinh nghiệm nhé:';
+    reviewList.appendChild(label);
+
+    wrongOnes.forEach(r => {
+      const q = r.question;
+      const item = document.createElement('div');
+      item.className = 'review-item';
+
+      const h = document.createElement('div');
+      h.className = 'review-hangul';
+      h.textContent = q.fullHangul;
+      item.appendChild(h);
+
+      const p = document.createElement('div');
+      p.className = 'review-pron';
+      p.textContent = 'Phiên âm: ' + q.pron;
+      item.appendChild(p);
+
+      if(q.meaning){
+        const m = document.createElement('div');
+        m.className = 'review-meaning';
+        m.textContent = 'Nghĩa: ' + q.meaning;
+        item.appendChild(m);
+      }
+
+      reviewList.appendChild(item);
+    });
+  }
+}
+
+})();
+</script>
+</body>
+</html>
